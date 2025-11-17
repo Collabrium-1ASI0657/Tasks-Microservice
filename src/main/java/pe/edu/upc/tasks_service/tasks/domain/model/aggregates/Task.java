@@ -38,6 +38,7 @@ public class Task extends AuditableAbstractAggregateRoot<Task> {
   @JoinColumn(name = "member_id")
   private Member member;
 
+  @Setter
   @Embedded
   private GroupId groupId;
 

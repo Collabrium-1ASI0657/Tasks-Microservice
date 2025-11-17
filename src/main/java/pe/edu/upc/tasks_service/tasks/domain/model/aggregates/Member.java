@@ -16,7 +16,7 @@ import java.util.List;
     @AttributeOverride(name = "groupId.value", column = @Column(name = "group_id"))
 })
 public class Member extends AuditableAbstractAggregateRoot<Member> {
-  @OneToMany(mappedBy = "member")
+  @OneToMany(mappedBy = "member", fetch = FetchType.EAGER)
   private List<Task> tasks;
 
   @Embedded
@@ -34,5 +34,14 @@ public class Member extends AuditableAbstractAggregateRoot<Member> {
   public void removeTask(Task task) {
     this.tasks.remove(task);
     task.setMember(null);
+  }
+
+  public void clearTasks() {
+    if (this.tasks != null) {
+      for (Task task : this.tasks) {
+        task.setMember(null); // romper relación bidireccional
+      }
+      this.tasks.clear(); // vaciar la lista
+    }
   }
 }
