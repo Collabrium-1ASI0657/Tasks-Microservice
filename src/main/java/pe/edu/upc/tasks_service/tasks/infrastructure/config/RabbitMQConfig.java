@@ -29,6 +29,10 @@ public class RabbitMQConfig {
   public static final String ROUTING_KEY_GROUP_ACCEPTED = "group.accepted";
   public static final String QUEUE_GROUP_ACCEPTED = "tasks.group-accepted";
 
+  // Evento: un miembro decide salir de un grupo
+  public static final String ROUTING_KEY_MEMBER_LEFT = "group.member.left";
+  public static final String QUEUE_MEMBER_LEFT = "tasks.member-left";
+
   public static final String ROUTING_KEY_MEMBER_REMOVED = "group.member.removed";
   public static final String QUEUE_MEMBER_REMOVED = "tasks.member-removed";
 
@@ -95,5 +99,17 @@ public class RabbitMQConfig {
     return BindingBuilder.bind(memberRemovedQueue)
         .to(tasksExchange)
         .with(ROUTING_KEY_MEMBER_REMOVED);
+  }
+
+  @Bean
+  public Queue memberLeftQueue() {
+    return new Queue(QUEUE_MEMBER_LEFT, true);
+  }
+
+  @Bean
+  public Binding memberLeftBinding(Queue memberLeftQueue, TopicExchange tasksExchange) {
+    return BindingBuilder.bind(memberLeftQueue)
+        .to(tasksExchange)
+        .with(ROUTING_KEY_MEMBER_LEFT);
   }
 }

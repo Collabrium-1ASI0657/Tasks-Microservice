@@ -1,5 +1,6 @@
 package pe.edu.upc.tasks_service.tasks.application.internal.commandservices;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import pe.edu.upc.tasks_service.tasks.domain.model.aggregates.Member;
 import pe.edu.upc.tasks_service.tasks.domain.model.commands.AddGroupToMemberCommand;
@@ -9,6 +10,7 @@ import pe.edu.upc.tasks_service.tasks.domain.model.valueobjects.GroupId;
 import pe.edu.upc.tasks_service.tasks.domain.services.MemberCommandService;
 import pe.edu.upc.tasks_service.tasks.infrastructure.messaging.IamEventPublisher;
 import pe.edu.upc.tasks_service.tasks.infrastructure.persistence.jpa.repositories.MemberRepository;
+import pe.edu.upc.tasks_service.tasks.infrastructure.persistence.jpa.repositories.TaskRepository;
 
 import java.util.Optional;
 
@@ -16,11 +18,14 @@ import java.util.Optional;
 public class MemberCommandServiceImpl implements MemberCommandService {
   private final MemberRepository memberRepository;
   private final IamEventPublisher iamEventPublisher;
+  private final TaskRepository taskRepository;
 
   public MemberCommandServiceImpl(MemberRepository memberRepository,
-                                  IamEventPublisher iamEventPublisher) {
+                                  IamEventPublisher iamEventPublisher,
+                                  TaskRepository taskRepository) {
     this.memberRepository = memberRepository;
     this.iamEventPublisher = iamEventPublisher;
+    this.taskRepository = taskRepository;
   }
 
   @Override
@@ -45,11 +50,26 @@ public class MemberCommandServiceImpl implements MemberCommandService {
   }
 
   @Override
+  @Transactional
   public Optional<Member> handle(RemoveMemberFromGroupCommand command) {
-    var member = memberRepository.findById(command.memberId());
-    if (member.isEmpty()){ throw new RuntimeException("Member not found"); }
-    member.get().setGroupId(null);
-    memberRepository.save(member.get());
-    return member;
+    var memberId = command.memberId();
+    if(!this.memberRepository.existsById(memberId)) {
+      throw new IllegalArgumentException("Member with id " + memberId + " does not exist");
+    }
+    try {
+      var member = memberRepository.findById(memberId)
+          .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+      // 1. Eliminar sus tasks
+      taskRepository.deleteAllByMember_Id(memberId);
+
+      // 2. Romper relación con el grupo
+      member.setGroupId(null);
+      memberRepository.save(member);
+
+      return Optional.of(member);
+    } catch (Exception e) {
+      throw new IllegalArgumentException("Error deleting tasks for member: " + e.getMessage());
+    }
   }
 }
