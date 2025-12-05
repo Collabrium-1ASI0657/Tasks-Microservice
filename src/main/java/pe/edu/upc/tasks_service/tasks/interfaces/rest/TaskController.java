@@ -13,8 +13,10 @@ import pe.edu.upc.tasks_service.tasks.domain.model.queries.GetAllTasksByGroupIdQ
 import pe.edu.upc.tasks_service.tasks.domain.model.queries.GetTaskByIdQuery;
 import pe.edu.upc.tasks_service.tasks.domain.services.TaskCommandService;
 import pe.edu.upc.tasks_service.tasks.domain.services.TaskQueryService;
+import pe.edu.upc.tasks_service.tasks.interfaces.rest.resources.TaskDetailsResource;
 import pe.edu.upc.tasks_service.tasks.interfaces.rest.resources.TaskResource;
 import pe.edu.upc.tasks_service.tasks.interfaces.rest.resources.UpdateTaskResource;
+import pe.edu.upc.tasks_service.tasks.interfaces.rest.transform.TaskDetailsResourceFromEntityAssembler;
 import pe.edu.upc.tasks_service.tasks.interfaces.rest.transform.TaskResourceFromEntityAssembler;
 import pe.edu.upc.tasks_service.tasks.interfaces.rest.transform.UpdateTaskCommandFromResourceAssembler;
 
@@ -50,6 +52,17 @@ public class TaskController {
     if (userResource.isEmpty()) return ResponseEntity.notFound().build();
 
     var taskResource = TaskResourceFromEntityAssembler.toResourceFromEntity(task.get(), userResource.get());
+    return ResponseEntity.ok(taskResource);
+  }
+
+  @GetMapping("/details/{taskId}")
+  @Operation(summary = "Get task details by id", description = "Get task details by id")
+  public ResponseEntity<TaskDetailsResource> getTaskDetailsById(@PathVariable Long taskId) {
+    var getTaskByIdQuery = new GetTaskByIdQuery(taskId);
+    var task = this.taskQueryService.handle(getTaskByIdQuery);
+    if (task.isEmpty()) return ResponseEntity.notFound().build();
+
+    var taskResource = TaskDetailsResourceFromEntityAssembler.toResourceFromEntity(task.get());
     return ResponseEntity.ok(taskResource);
   }
 

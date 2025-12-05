@@ -14,6 +14,8 @@ public class TaskResourceFromEntityAssembler {
         entity.getCreatedAt().toString(),
         entity.getUpdatedAt().toString(),
         entity.getStatus().toString(),
+        entity.getTimesRearranged(),
+        entity.getTimePassed(),
         TaskMemberResourceFromEntityAssembler.toResourceFromEntity(user),
         entity.getGroupId().value()
     );

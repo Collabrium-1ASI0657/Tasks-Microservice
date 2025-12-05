@@ -41,4 +41,6 @@ public interface TaskQueryService {
    * @return
    */
   List<Task> handle(GetAllTasksByGroupIdQuery query);
+
+  Optional<Task> handle(GetTaskDetailsByIdQuery query);
 }

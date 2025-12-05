@@ -7,6 +7,8 @@ public record TaskResource(Long id,
                            String createdAt,
                            String updatedAt,
                            String status,
+                           Integer timesRearranged,
+                           Long timePassed,
                            TaskMemberResource member,
                            Long groupId) {
 }

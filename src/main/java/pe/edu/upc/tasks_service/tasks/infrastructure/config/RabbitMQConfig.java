@@ -28,6 +28,8 @@ public class RabbitMQConfig {
   public static final String TASKS_EXCHANGE_NAME = "tasks-events-exchange";
   public static final String ROUTING_KEY_GROUP_ACCEPTED = "group.accepted";
   public static final String QUEUE_GROUP_ACCEPTED = "tasks.group-accepted";
+  public static final String ROUTING_KEY_GROUP_DELETED = "group.deleted";
+  public static final String QUEUE_GROUP_DELETED = "tasks.group-deleted";
 
   // Evento: un miembro decide salir de un grupo
   public static final String ROUTING_KEY_MEMBER_LEFT = "group.member.left";
@@ -111,5 +113,17 @@ public class RabbitMQConfig {
     return BindingBuilder.bind(memberLeftQueue)
         .to(tasksExchange)
         .with(ROUTING_KEY_MEMBER_LEFT);
+  }
+
+  @Bean
+  public Queue groupDeletedQueue() {
+    return new Queue(QUEUE_GROUP_DELETED, true);
+  }
+
+  @Bean
+  public Binding groupDeletedBinding(Queue groupDeletedQueue, TopicExchange tasksExchange) {
+    return BindingBuilder.bind(groupDeletedQueue)
+        .to(tasksExchange)
+        .with(ROUTING_KEY_GROUP_DELETED);
   }
 }

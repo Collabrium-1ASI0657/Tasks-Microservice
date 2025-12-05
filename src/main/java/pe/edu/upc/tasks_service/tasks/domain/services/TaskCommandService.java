@@ -11,4 +11,5 @@ public interface TaskCommandService {
   void handle(DeleteTaskCommand command);
   Optional<Task> handle(UpdateTaskStatusCommand command);
   void handle(DeleteTasksByMemberId command);
+  void handle(DeleteTasksByGroupIdCommand command);
 }
