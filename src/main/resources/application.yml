@@ -2,11 +2,11 @@ spring:
   application:
     name: tasks-service
   rabbitmq:
-    host: woodpecker.rmq.cloudamqp.com
-    port: 5671
-    username: qdockgcf
-    password: CtfBnZjtftQEOyAEBWhhgdFpft9ONruW
-    virtual-host: qdockgcf
+    host: ${RABBIT_HOST}
+    port: ${RABBIT_PORT}
+    username: ${RABBIT_USER}
+    password: ${RABBIT_PASSWORD}
+    virtual-host: ${RABBIT_VIRTUAL_HOST}
     ssl:
       enabled: true
 
@@ -16,6 +16,6 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: https://discovery-server-synhub.onrender.com/eureka/
+      defaultZone: ${EUREKA_URL}
   instance:
     prefer-ip-address: true
