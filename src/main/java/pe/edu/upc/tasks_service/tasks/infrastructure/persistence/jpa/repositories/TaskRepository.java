@@ -16,4 +16,5 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   List<Task> findByGroupId(GroupId groupId);
   List<Task> findAllByStatusAndDueDateBefore(TaskStatus status, OffsetDateTime dueDate);
   void deleteAllByMember_Id(Long memberId);
+  void deleteAllByGroupId(GroupId groupId);
 }

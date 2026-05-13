@@ -1,5 +1,6 @@
 package pe.edu.upc.tasks_service.tasks.application.internal.commandservices;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import pe.edu.upc.tasks_service.tasks.application.clients.groups.GroupsServiceClient;
 import pe.edu.upc.tasks_service.tasks.domain.model.aggregates.Task;
@@ -178,6 +179,22 @@ public class TaskCommandServiceImpl implements TaskCommandService {
 
     } catch (Exception e) {
       throw new IllegalArgumentException("Error deleting tasks for member: " + e.getMessage());
+    }
+  }
+
+  @Override
+  @Transactional
+  public void handle(DeleteTasksByGroupIdCommand command) {
+    var groupId = command.groupId();
+    var tasks = taskRepository.findByGroupId(new GroupId(groupId));
+
+    for (var task : tasks) {
+      var member = task.getMember();
+      if (member != null) {
+        member.removeTask(task);
+        memberRepository.save(member);
+      }
+      taskRepository.delete(task);
     }
   }
 }

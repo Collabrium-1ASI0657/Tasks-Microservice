@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import pe.edu.upc.tasks_service.tasks.domain.model.aggregates.Member;
 import pe.edu.upc.tasks_service.tasks.domain.model.commands.AddGroupToMemberCommand;
 import pe.edu.upc.tasks_service.tasks.domain.model.commands.CreateMemberCommand;
+import pe.edu.upc.tasks_service.tasks.domain.model.commands.DeleteMembersByGroupIdCommand;
 import pe.edu.upc.tasks_service.tasks.domain.model.commands.RemoveMemberFromGroupCommand;
 import pe.edu.upc.tasks_service.tasks.domain.model.valueobjects.GroupId;
 import pe.edu.upc.tasks_service.tasks.domain.services.MemberCommandService;
@@ -70,6 +71,22 @@ public class MemberCommandServiceImpl implements MemberCommandService {
       return Optional.of(member);
     } catch (Exception e) {
       throw new IllegalArgumentException("Error deleting tasks for member: " + e.getMessage());
+    }
+  }
+
+  @Override
+  @Transactional
+  public void handle(DeleteMembersByGroupIdCommand command) {
+    var groupId = new GroupId(command.groupId());
+    var members = memberRepository.findMembersByGroupId(groupId);
+
+    for (var member : members) {
+      // eliminar todas sus tasks primero
+      taskRepository.deleteAllByMember_Id(member.getId());
+
+      // romper la relación con el grupo
+      member.setGroupId(null);
+      memberRepository.save(member);
     }
   }
 }
